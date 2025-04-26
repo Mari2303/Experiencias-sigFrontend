@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar/Actualizar Rol</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto my-8">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-center mb-6">Registrar/Actualizar Rol</h2>
+
+            <form id="rolForm" action="#" method="POST">
+                <input type="hidden" id="rolId" name="id">
+                
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700">Nombre del Rol</label>
+                    <input type="text" id="name" name="name" class="mt-2 p-2 w-full border border-gray-300 rounded-lg" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="typeRol" class="block text-gray-700">Tipo de Rol</label>
+                    <input type="text" id="typeRol" name="typeRol" class="mt-2 p-2 w-full border border-gray-300 rounded-lg" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="active" class="block text-gray-700">Activo</label>
+                    <select id="active" name="active" class="mt-2 p-2 w-full border border-gray-300 rounded-lg" required>
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-6 rounded-lg">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const rolForm = document.getElementById("rolForm");
+        const rolIdField = document.getElementById("rolId");
+        const nameField = document.getElementById("name");
+        const typeRolField = document.getElementById("typeRol");
+        const activeField = document.getElementById("active");
+
+        // Función para enviar los datos del formulario
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const rolDTO = {
+                id: rolIdField.value,
+                name: nameField.value,
+                typeRol: typeRolField.value,
+                active: activeField.value === "true"
+            };
+
+            // Determinar si estamos creando o actualizando el rol
+            const apiUrl = rolDTO.id ? `https://localhost:7199/api/Rol/${rolDTO.id}` : 'https://localhost:7199/api/Rol'; // Si el ID está presente, es una actualización
+            const method = rolDTO.id ? 'PUT' : 'POST';
+
+            try {
+                // Hacer la petición a la API
+                const response = await axios({
+                    method: method,
+                    url: apiUrl,
+                    data: rolDTO
+                });
+
+                // Mostrar mensaje de éxito o manejar respuesta
+                alert("Rol guardado exitosamente");
+                console.log(response.data); // Mostrar el objeto del rol guardado
+
+                // Limpiar formulario
+                rolForm.reset();
+                rolIdField.value = ""; // Limpiar el ID en caso de actualizar
+            } catch (error) {
+                console.error("Hubo un error:", error);
+                alert("Ocurrió un error al guardar el rol.");
+            }
+        }
+
+        // Asignar evento al formulario
+        rolForm.addEventListener("submit", submitForm);
+
+        // Función para cargar datos en caso de edición
+        async function loadRolData(rolId) {
+            try {
+                // Realizar la petición GET para obtener los datos del rol
+                const response = await axios.get(`https://localhost:7199/api/Rol/${rolId}`);
+                const rol = response.data;
+
+                // Cargar los datos del rol en los campos del formulario
+                rolIdField.value = rol.id;
+                nameField.value = rol.name;
+                typeRolField.value = rol.typeRol;
+                activeField.value = rol.active.toString();
+            } catch (error) {
+                console.error("Error al cargar el rol:", error);
+                alert("No se pudo cargar los datos del rol.");
+            }
+        }
+
+        // Ejemplo: Cargar un rol para actualizar (esto sería dinámico en la aplicación)
+        loadRolData(1); // Llamada de ejemplo para cargar el rol con ID 1
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Verificaciones</title>
+    <script>
+        const apiUrl = 'https://localhost:7199/api/Verification'; // Cambia la URL según tu entorno
+
+        // Función para obtener todas las verificaciones
+        async function getAllVerifications() {
+            try {
+                const response = await fetch(apiUrl);
+                const verifications = await response.json();
+                const list = document.getElementById('verificationList');
+                list.innerHTML = '';
+                verifications.forEach(verification => {
+                    const li = document.createElement('li');
+                    li.textContent = `${verification.id} - ${verification.name} - ${verification.description}`;
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error al obtener las verificaciones:', error);
+            }
+        }
+
+        // Función para obtener una verificación por su ID
+        async function getVerificationById() {
+            const id = document.getElementById('getById').value;
+            try {
+                const response = await fetch(`${apiUrl}/${id}`);
+                const verification = await response.json();
+                if (verification.id) {
+                    document.getElementById('verificationDetails').textContent = 
+                        `ID: ${verification.id}, Nombre: ${verification.name}, Descripción: ${verification.description}`;
+                } else {
+                    document.getElementById('verificationDetails').textContent = 'Verificación no encontrada.';
+                }
+            } catch (error) {
+                console.error('Error al obtener la verificación por ID:', error);
+            }
+        }
+
+        // Función para crear una nueva verificación
+        async function createVerification() {
+            const name = document.getElementById('createName').value;
+            const description = document.getElementById('createDescription').value;
+            const data = { name, description };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert('Verificación creada: ' + result.id);
+                getAllVerifications(); // Actualizar la lista de verificaciones
+            } catch (error) {
+                console.error('Error al crear la verificación:', error);
+            }
+        }
+
+        // Función para actualizar una verificación
+        async function updateVerification() {
+            const id = document.getElementById('updateId').value;
+            const name = document.getElementById('updateName').value;
+            const description = document.getElementById('updateDescription').value;
+            const data = { name, description };
+            
+            try {
+                const response = await fetch(`${apiUrl}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    alert('Verificación actualizada');
+                    getAllVerifications(); // Actualizar la lista de verificaciones
+                } else {
+                    alert('Error al actualizar la verificación');
+                }
+            } catch (error) {
+                console.error('Error al actualizar la verificación:', error);
+            }
+        }
+
+        // Función para eliminar una verificación
+        async function deleteVerification() {
+            const id = document.getElementById('deleteId').value;
+            try {
+                const response = await fetch(`${apiUrl}/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    alert('Verificación eliminada');
+                    getAllVerifications(); // Actualizar la lista de verificaciones
+                } else {
+                    alert('Error al eliminar la verificación');
+                }
+            } catch (error) {
+                console.error('Error al eliminar la verificación:', error);
+            }
+        }
+
+        // Cargar las verificaciones al cargar la página
+        window.onload = getAllVerifications;
+    </script>
+</head>
+<body>
+    <h1>Gestión de Verificaciones</h1>
+    
+    <!-- Obtener todas las verificaciones -->
+    <section>
+        <h2>Lista de Verificaciones</h2>
+        <ul id="verificationList"></ul>
+    </section>
+
+    <!-- Obtener una verificación por ID -->
+    <section>
+        <h2>Buscar Verificación por ID</h2>
+        <input type="number" id="getById" placeholder="Ingrese ID">
+        <button onclick="getVerificationById()">Buscar</button>
+        <p id="verificationDetails"></p>
+    </section>
+
+    <!-- Crear nueva verificación -->
+    <section>
+        <h2>Crear Verificación</h2>
+        <input type="text" id="createName" placeholder="Nombre" required>
+        <input type="text" id="createDescription" placeholder="Descripción" required>
+        <button onclick="createVerification()">Crear</button>
+    </section>
+
+    <!-- Actualizar verificación -->
+    <section>
+        <h2>Actualizar Verificación</h2>
+        <input type="number" id="updateId" placeholder="ID de la verificación" required>
+        <input type="text" id="updateName" placeholder="Nuevo Nombre" required>
+        <input type="text" id="updateDescription" placeholder="Nueva Descripción" required>
+        <button onclick="updateVerification()">Actualizar</button>
+    </section>
+
+    <!-- Eliminar verificación -->
+    <section>
+        <h2>Eliminar Verificación</h2>
+        <input type="number" id="deleteId" placeholder="ID de la verificación" required>
+        <button onclick="deleteVerification()">Eliminar</button>
+    </section>
+</body>
+</html>
