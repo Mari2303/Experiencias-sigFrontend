@@ -1,155 +1,65 @@
-// URL base de la API
-const API_URL = 'https://localhost:7199/api/Rol'; // Cambia a la URL de tu API
-let currentRoleId = null;  // Para guardar el ID del rol actualmente seleccionado
-let roles = [];  // Lista de roles
+const rolForm = document.getElementById("rolForm");
+const rolIdField = document.getElementById("rolId");
+const nameField = document.getElementById("name");
+const typeRolField = document.getElementById("typeRol");
+const activeField = document.getElementById("active");
 
-// Función para mostrar mensajes
-function showToast(message, type) {
-    // Aquí puedes implementar un sistema de notificaciones para mostrar mensajes
-    alert(`${type}: ${message}`);
-}
+// Función para enviar los datos del formulario
+async function submitForm(event) {
+    event.preventDefault();
 
-// Función para mostrar el estado de carga
-function showLoading(isLoading) {
-    // Aquí puedes mostrar un indicador de carga
-    console.log(isLoading ? "Cargando..." : "Listo");
-}
+    const rolDTO = {
+        id: rolIdField.value,
+        name: nameField.value,
+        typeRol: typeRolField.value,
+        active: activeField.value === "true"
+    };
 
-// Función para obtener todos los roles desde la API
-async function fetchRoles() {
-    showLoading(true);
+    // Determinar si estamos creando o actualizando el rol
+    const apiUrl = rolDTO.id ? `https://localhost:7199/api/Rol/${rolDTO.id}` : 'https://localhost:7199/api/Rol'; // Si el ID está presente, es una actualización
+    const method = rolDTO.id ? 'PUT' : 'POST';
+
     try {
-        const res = await fetch(`${API_URL}/roles`);
-        if (!res.ok) throw new Error('Error al obtener los roles');
-        roles = await res.json();
-        renderRolesTable();
-    } catch (err) {
-        showToast(err.message, 'danger');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Función para mostrar los roles en la tabla
-function renderRolesTable() {
-    const rolesTableBody = document.getElementById('rolesTableBody');
-    rolesTableBody.innerHTML = '';
-    roles.forEach(role => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${role.id}</td>
-            <td>${role.name}</td>
-            <td>
-                <button class="btn btn-info btn-sm" onclick="editRole(${role.id})">
-                    <i class="bi bi-pencil"></i> Editar
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRoleConfirmation(${role.id})">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
-            </td>
-        `;
-        rolesTableBody.appendChild(tr);
-    });
-}
-
-// Función para editar un rol (Abre el modal con los datos del rol)
-function editRole(id) {
-    currentRoleId = id;
-    const role = roles.find(r => r.id === id);
-    document.getElementById('roleName').value = role.name;
-    document.getElementById('modalTitle').textContent = 'Actualizar Rol';
-    $('#roleModal').modal('show');  // Usando Bootstrap para mostrar el modal
-}
-
-// Función para eliminar un rol (Llamada a confirmación de eliminación)
-function deleteRoleConfirmation(id) {
-    currentRoleId = id;
-    $('#deleteModal').modal('show');  // Usando Bootstrap para mostrar el modal de confirmación
-}
-
-// Función para actualizar completamente un rol (PUT)
-async function updateRole(data) {
-    showLoading(true);
-    try {
-        const res = await fetch(`${API_URL}/roles/${currentRoleId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
+        // Hacer la petición a la API
+        const response = await axios({
+            method: method,
+            url: apiUrl,
+            data: rolDTO
         });
 
-        if (!res.ok) throw new Error('Error al actualizar el rol');
-        await fetchRoles();  // Recargar la lista de roles
-        showToast('Rol actualizado exitosamente', 'success');
-    } catch (err) {
-        showToast(err.message, 'danger');
-    } finally {
-        showLoading(false);
+        // Mostrar mensaje de éxito o manejar respuesta
+        alert("Rol guardado exitosamente");
+        console.log(response.data); // Mostrar el objeto del rol guardado
+
+        // Limpiar formulario
+        rolForm.reset();
+        rolIdField.value = ""; // Limpiar el ID en caso de actualizar
+    } catch (error) {
+        console.error("Hubo un error:", error);
+        alert("Ocurrió un error al guardar el rol.");
     }
 }
 
-// Función para actualizar parcialmente un rol (PATCH)
-async function updatePartialRole(data) {
-    showLoading(true);
+// Asignar evento al formulario
+rolForm.addEventListener("submit", submitForm);
+
+// Función para cargar datos en caso de edición
+async function loadRolData(rolId) {
     try {
-        const res = await fetch(`${API_URL}/roles/${currentRoleId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
+        // Realizar la petición GET para obtener los datos del rol
+        const response = await axios.get(`https://localhost:7199/api/Rol/${rolId}`);
+        const rol = response.data;
 
-        if (!res.ok) throw new Error('Error al actualizar parcialmente el rol');
-        await fetchRoles();  // Recargar la lista de roles
-        showToast('Rol actualizado parcialmente', 'success');
-    } catch (err) {
-        showToast(err.message, 'danger');
-    } finally {
-        showLoading(false);
+        // Cargar los datos del rol en los campos del formulario
+        rolIdField.value = rol.id;
+        nameField.value = rol.name;
+        typeRolField.value = rol.typeRol;
+        activeField.value = rol.active.toString();
+    } catch (error) {
+        console.error("Error al cargar el rol:", error);
+        alert("No se pudo cargar los datos del rol.");
     }
 }
 
-// Función para eliminar un rol lógicamente (DELETE)
-async function deleteRole(id) {
-    showLoading(true);
-    try {
-        const res = await fetch(`${API_URL}/roles/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ active: false }),  // Marcar el rol como inactivo
-        });
-
-        if (!res.ok) throw new Error('Error al eliminar el rol');
-        await fetchRoles();  // Recargar la lista de roles
-        showToast('Rol eliminado exitosamente', 'success');
-    } catch (err) {
-        showToast(err.message, 'danger');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// Función para enviar los datos del formulario para actualizar el rol
-async function submitRoleForm() {
-    const roleName = document.getElementById('roleName').value;
-
-    if (!roleName) {
-        showToast('El nombre del rol es obligatorio', 'danger');
-        return;
-    }
-
-    const roleData = { name: roleName };
-
-    if (currentRoleId) {
-        await updateRole(roleData);  // Actualizar el rol completo
-    } else {
-        await updatePartialRole(roleData);  // Actualización parcial (si necesario)
-    }
-}
-
-// Inicialización: Cargar roles al inicio
-fetchRoles();
+// Ejemplo: Cargar un rol para actualizar (esto sería dinámico en la aplicación)
+loadRolData(1); // Llamada de ejemplo para cargar el rol con ID 1
