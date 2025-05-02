@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Personas</title>
+  <link rel="stylesheet" href="css/Person.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Formulario Persona</h1>
+
+  <form id="personForm" onsubmit="crearPersonaYUsuario(event)">
+    <input type="text" id="name" placeholder="Nombre">
+    <input type="text" id="surname" placeholder="Apellido">
+    <input type="text" id="document" placeholder="Documento">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Contraseña">
+    <input type="text" id="phone" placeholder="Teléfono">
+    <input type="text" id="codeDane" placeholder="Código DANE">
+    <button type="submit">Registrar</button>
+  </form>
+  
+
+  <div id="lista-personas">
+    <!-- Aquí se puede cargar la lista de personas con JavaScript -->
+  </div>
+
+  <!-- Asegúrate de enlazar correctamente el JS -->
+  <script src="js/Modulos/Person.js"></script>
+  <script>
+    // Asociar el evento solo cuando el DOM ya está listo
+    document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('personForm').addEventListener('submit', crearPersonaYUsuario);
+  });
+  </script>
+</body>
+</html>
