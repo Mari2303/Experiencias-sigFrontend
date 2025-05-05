@@ -1,23 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Iniciar Sesión</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Iniciar Sesión</h2>
-  <form id="loginForm">
-    <label for="email">Correo electrónico:</label>
-    <input type="email" id="email" required><br><br>
+<body class="bg-gradient-to-br from-pink-100 via-white to-purple-100 min-h-screen flex items-center justify-center">
 
-    <label for="password">Contraseña:</label>
-    <input type="password" id="password" required><br><br>
+  <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md">
+    <h2 class="text-3xl font-bold text-center text-pink-600 mb-6">Iniciar Sesión</h2>
+    
+    <form id="loginForm" class="space-y-4">
+      <input type="email" id="email" placeholder="Correo electrónico" required 
+        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400" />
+      
+      <input type="password" id="password" placeholder="Contraseña" required 
+        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400" />
+      
+      <button type="submit"
+        class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 rounded-full transition duration-300">
+        Ingresar
+      </button>
+    </form>
 
-    <button type="submit">Iniciar sesión</button>
-  </form>
+    <p class="mt-4 text-center text-sm text-gray-600">
+      ¿No tienes cuenta? 
+      <a href="Person.html" class="text-pink-500 hover:underline font-medium">Regístrate</a>
+    </p>
+
+    <div id="mensaje" class="mt-4 text-center text-sm text-red-500"></div>
+  </div>
 
   <script src="js/Modulos/Login.js"></script>
 </body>
 </html>
+
 
   

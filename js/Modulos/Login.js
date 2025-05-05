@@ -1,10 +1,18 @@
-const loginApiUrl = 'https://localhost:7199/api/User/login';
+const loginApiUrl = 'https://localhost:7199/api/Auth/login';
 
-document.getElementById('loginForm').addEventListener('submit', async function (event) {
+
+document.getElementById('loginForm').addEventListener('submit', loginUsuario);
+
+async function loginUsuario(event) {
   event.preventDefault();
 
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+
+  if (!email || !password) {
+    alert("Por favor completa todos los campos.");
+    return;
+  }
 
   try {
     const response = await fetch(loginApiUrl, {
@@ -13,18 +21,19 @@ document.getElementById('loginForm').addEventListener('submit', async function (
       body: JSON.stringify({ email, password })
     });
 
-    if (response.ok) {
-      const user = await response.json();
-      alert(`Bienvenido, ${user.email}`);
-      // Aquí puedes redirigir, guardar info en localStorage, etc.
-      // window.location.href = '/dashboard.html';
-    } else {
-      const errorText = await response.text();
-      alert("Error: " + errorText);
+    if (!response.ok) {
+      throw new Error("Credenciales inválidas");
     }
+
+    const user = await response.json();
+    localStorage.setItem('usuario', JSON.stringify(user));
+
+    alert(`¡Bienvenido, ${user.email}!`);
+    window.location.href = "index.html";
   } catch (error) {
-    console.error("Error al iniciar sesión:", error);
-    alert("Error de conexión con el servidor.");
+    console.error(error);
+    const mensajeDiv = document.getElementById('mensaje');
+    mensajeDiv.textContent = error.message;
   }
-});
+}
 

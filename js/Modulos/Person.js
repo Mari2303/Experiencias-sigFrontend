@@ -1,10 +1,12 @@
 const personApiUrl = 'https://localhost:7199/api/Person';
-const userApiUrl = 'https://localhost:7199/api/User'; // ajusta según tu backend
+const userApiUrl = 'https://localhost:7199/api/User';
+const roleUserApiUrl = 'https://localhost:7199/api/UserRol'; // Endpoint para asignar rol
+
+document.getElementById('personForm').addEventListener('submit', crearPersonaYUsuario);
 
 async function crearPersonaYUsuario(event) {
   event.preventDefault();
 
-  // Recolectar valores del formulario
   const name = document.getElementById('name').value;
   const surname = document.getElementById('surname').value;
   const documentNumber = document.getElementById('document').value;
@@ -13,17 +15,16 @@ async function crearPersonaYUsuario(event) {
   const phone = document.getElementById('phone').value;
   const codeDane = document.getElementById('codeDane').value;
 
-  // Validar campos básicos
   if (!name || !surname || !documentNumber || !email || !password) {
     alert("Por favor completa todos los campos requeridos.");
     return;
   }
 
-  // Crear objeto Persona
   const personaData = {
     name: name,
     surname: surname,
     document: documentNumber,
+    password: password,
     email: email,
     phone: phone,
     codeDane: codeDane,
@@ -31,50 +32,72 @@ async function crearPersonaYUsuario(event) {
   };
 
   try {
-    // 1. Crear la persona
+    // Paso 1: Crear Persona
     const personaResponse = await fetch(personApiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(personaData)
     });
 
     if (!personaResponse.ok) {
-      const error = await personaResponse.text();
-      throw new Error("Error al crear persona: " + error);
+      throw new Error('Error al crear la persona.');
     }
 
     const personaCreada = await personaResponse.json();
-    const personaId = personaCreada.id; // Asegúrate que tu backend devuelve el ID
+    const personId = personaCreada.id;
 
-    // 2. Crear el usuario vinculado con el ID de persona
+    // Paso 2: Crear Usuario
     const userData = {
       email: email,
       password: password,
-      personId: personaId, // este campo debe existir en tu backend
+      personId: personId, // en lugar de { person: { id: personId } }
       active: true
     };
+    
 
     const userResponse = await fetch(userApiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(userData)
     });
 
     if (!userResponse.ok) {
-      const error = await userResponse.text();
-      throw new Error("Error al crear usuario: " + error);
+      throw new Error('Error al crear el usuario.');
     }
 
-    alert("Persona y usuario registrados con éxito.");
+    const usuarioCreado = await userResponse.json();
+    const userId = usuarioCreado.id;
+
+    // Paso 3: Asignar rol predeterminado
+    const UserRolData = {
+      userId: userId,
+      TypeRol : "profesor",
+      rolId: 15,
+      active: true
+    };
+
+    const roleResponse = await fetch(roleUserApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(UserRolData)
+    });
+
+    if (!roleResponse.ok) {
+      throw new Error('Error al asignar el rol al usuario.');
+    }
+
+    alert("¡Registro exitoso!");
     document.getElementById('personForm').reset();
-    // Puedes recargar la lista si tienes una función cargarPersonas()
-    cargarPersonas?.();
+    window.location.href = "login.html";
 
   } catch (error) {
     console.error(error);
     alert(error.message);
   }
-
-
-  
 }
